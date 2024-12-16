@@ -1,11 +1,14 @@
-import { View, Text } from "react-native";
+import { View, Text, ScrollView } from "react-native";
 import React from "react";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const BookMark = () => {
   return (
-    <View>
-      <Text>BookMark</Text>
-    </View>
+    <SafeAreaView>
+      <ScrollView>
+        <Text>BookMark</Text>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 

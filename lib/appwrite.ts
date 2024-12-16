@@ -16,12 +16,18 @@ export const config = {
   videoCollectionId: "675c1cec003401c0cd02",
   storageId: "675c1e80003002bfdade",
 };
+const {
+  endpoint,
+  platform,
+  projectId,
+  databaseId,
+  userCollectionId,
+  videoCollectionId,
+  storageId,
+} = config;
 
 const client = new Client();
-client
-  .setEndpoint(config.endpoint)
-  .setProject(config.projectId)
-  .setPlatform(config.platform);
+client.setEndpoint(endpoint).setProject(projectId).setPlatform(platform);
 
 const account = new Account(client);
 const avatars = new Avatars(client);
@@ -40,8 +46,8 @@ export const createUser = async (
     await signIn(email, password);
 
     const newUser = await databeses.createDocument(
-      config.databaseId,
-      config.userCollectionId,
+      databaseId,
+      userCollectionId,
       ID.unique(),
       {
         accountId: newAccount.$id,
@@ -59,26 +65,42 @@ export const createUser = async (
 export const signIn = async (email: string, password: string) => {
   try {
     const session = await account.createEmailPasswordSession(email, password);
-
     return session;
   } catch (error) {
     throw new Error(String(error));
   }
 };
-
 export const getCurrentUser = async () => {
   try {
     const currentAccount = await account.get();
     if (!currentAccount) throw Error;
-    const currentUser = await databeses.listDocuments(
-      config.databaseId,
-      config.userCollectionId,
-      [Query.equal("accountId", currentAccount.$id)]
-    );
+    const currentUser = await databeses.listDocuments(databaseId, userCollectionId, [
+      Query.equal("accountId", currentAccount.$id),
+    ]);
     if (!currentUser) throw Error;
 
     return currentUser.documents[0];
   } catch (error) {
     console.log(error);
+  }
+};
+export const getAllPosts = async () => {
+  try {
+    const posts = await databeses.listDocuments(databaseId, videoCollectionId);
+    return posts.documents;
+  } catch (error) {
+    throw new Error(String(error));
+  }
+};
+
+export const getLatestPosts = async () => {
+  try {
+    const posts = await databeses.listDocuments(databaseId, videoCollectionId, [
+      Query.orderDesc("$createdAt"),
+      Query.limit(7),
+    ]);
+    return posts.documents;
+  } catch (error) {
+    throw new Error(String(error));
   }
 };
